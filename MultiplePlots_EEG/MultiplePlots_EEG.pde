@@ -10,7 +10,7 @@ Minim minim;
 FFT fftLin;
 
 // Serial port to connect to
-String serialPortName = "/dev/tty.usbmodem1411";
+String serialPortName = "COM3";
 boolean mockupSerial = true;
 Serial serialPort; // Serial port object
 
@@ -44,6 +44,7 @@ GPointsArray points3 = new GPointsArray(5);
   
 float[] rawPoints = new float[bufferSize];
 float[] filt_data = new float[bufferSize];
+float[] notch_filt_data = new float[bufferSize];
 byte[] inBuffer = new byte[100]; // holds serial message
 
 public void setup() {
@@ -66,8 +67,8 @@ public void setup() {
   plotTime = new GPlot(this);
   plotTime.setPos(0, 0);
   plotTime.setDim(850, 280);
-  plotTime.setXLim(0, bufferSize-128);
-  plotTime.setYLim(-32000, 32000);
+  plotTime.setXLim(0, bufferSize-254);
+  plotTime.setYLim(-30000, 30000);
   plotTime.drawGridLines(GPlot.VERTICAL);
   plotTime.setPoints(points1);
   plotTime.setLineColor(color(100, 0, 255));
@@ -116,7 +117,7 @@ public void setup() {
   
   // start serial communication
   if (!mockupSerial) {
-    //String serialPortName = Serial.list()[3];
+    //String serialPortName = Serial.list()[1];
     serialPort = new Serial(this, serialPortName, 115200);
   }
   else
@@ -143,20 +144,6 @@ public void draw() {
   plotHist.drawHistograms();
   plotHist.endDraw();
   
-
-  //// Add and remove new points every 10th of a second
-  //if (millis() - lastStepTime > 5) {
-  //  //int val = int((random(30)-15)*1000);
-  //  //val2 = (10*sin(angle*20)+(3*sin(angle*6))+(10*sin(angle*60))+(random(10)-5)/10)*10000;
-  //  val2 = 1000;
-  //  angle += 0.0314159;
-  //  lastStepTime = millis();
-  //}
-  //else {
-  //  val2 = 100;
-  //}
-    
-
   
   String myString = "";
     if (!mockupSerial) {
@@ -165,38 +152,48 @@ public void draw() {
       }
       catch (Exception e) {}
       myString = new String(inBuffer);
+      //println(myString);
     }
     else {
       myString = mockupSerialFunction();
     }
-    println(myString);
+ 
 
     // split the string at delimiter (space)
     //String[] nums = split(myString, ' ');
     
-    val2 = Float.parseFloat(myString);
-  
-  
-    for (int i = 1; i < bufferSize; i++) {
-      rawPoints[i-1] = rawPoints[i];
+    try {
+      val2 = Float.parseFloat(myString);
+      //println(val2);
     }
+    catch(Exception e) {val2 = 0;}
+    
+      
+      for (int i = 1; i < bufferSize; i++) {
+        rawPoints[i-1] = rawPoints[i];
+      }
      
-    rawPoints[bufferSize-1] = val2;
-    
-    filterIIR(notch_b1, notch_a1, rawPoints, filt_data);
-    
-    for (int i = 0; i < bufferSize; i++) { 
-      points1.setY(i, filt_data[i] );
-    }
-    fftLin.forward(filt_data);
+      rawPoints[bufferSize-1] = val2;
 
-    for (int i = 0; i < bufferSize; i++) { 
-      //points2.setY(i, (fftLin.getBand(i)*0.1)-0);
-      points2.setY(i, (20 * log(2*fftLin.getBand(i)/fftLin.timeSize())));
-    }
+      
+      filterIIR(notch_b2, notch_a2, rawPoints, filt_data);
+
+     
+      //null filter for test
+      //filterIIR(test_b, test_a, rawPoints, filt_data);
+      
+      for (int i = 0; i < bufferSize; i++) { 
+        points1.setY(i, filt_data[i] );
+      }
+      fftLin.forward(filt_data);
+
+      for (int i = 0; i < bufferSize; i++) { 
+        //points2.setY(i, (fftLin.getBand(i)*0.1)-0);
+        points2.setY(i, (20 * log(2*fftLin.getBand(i)/fftLin.timeSize())));
+      }
     
-    points3.setX(0,0.0005*fftLin.calcAvg(0.1,3.5));
-    points3.setX(1,0.0005*fftLin.calcAvg(3.5,7.0));
+    points3.setX(0,0.0005*fftLin.calcAvg(0.1,4));
+    points3.setX(1,0.0005*fftLin.calcAvg(4,7.0));
     points3.setX(2,0.0005*fftLin.calcAvg(7.0,14.0));
     points3.setX(3,0.0005*fftLin.calcAvg(14.0,28.0));
     points3.setX(4,0.0005*fftLin.calcAvg(28.0,58.0));
@@ -207,15 +204,19 @@ public void draw() {
   
   
 
-  plotFreq.beginDraw();
-  plotFreq.drawBackground();
-  plotFreq.drawBox();
-  plotFreq.drawTitle();
-  plotFreq.drawGridLines(GPlot.VERTICAL);
-  plotFreq.drawLines();
-  plotFreq.endDraw();
+    plotFreq.beginDraw();
+    plotFreq.drawBackground();
+    plotFreq.drawBox();
+    plotFreq.drawTitle();
+    plotFreq.drawGridLines(GPlot.VERTICAL);
+    plotFreq.drawLines();
+    plotFreq.endDraw();
   
-  freqAxis.beginDraw();
-  freqAxis.drawXAxis();
-  freqAxis.endDraw();
+    freqAxis.beginDraw();
+    freqAxis.drawXAxis();
+    freqAxis.endDraw();
+  
+  
+  
+
 }
