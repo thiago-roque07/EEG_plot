@@ -13,7 +13,7 @@ String mockupSerialFunction() {
     
     if (millis() - lastStepTime > (1000/Fs_mock)) {
       //int val = int((random(30)-15)*1000);
-      float val2 = (1*sin(angle_mock*21)+(1*sin(angle_mock*2))+(1*sin(angle_mock*5.5))+(1*sin(angle_mock*10.5))+(20*sin(angle_mock*60))+(random(10)-5)/10)*8000;
+      float val2 = (5*sin(angle_mock*21)+(1*sin(angle_mock*2))+(1*sin(angle_mock*5.5))+(1*sin(angle_mock*10.5))+(40*sin(angle_mock*60))+(random(10)-5)/10)*3000;
 
       r += val2;
       r += '\r';

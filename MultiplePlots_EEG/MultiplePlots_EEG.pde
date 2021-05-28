@@ -32,9 +32,6 @@ float angle = 0;
 
 float[] ticks = new float[] { 16.38, 28.67, 57.34, 114.59, 237.57 };
 
-//double[] notch_b2 = new double[] { 0.956543225556877, 1.18293615779028, 2.27881429174348, 1.18293615779028, 0.956543225556877 };
-//double[] notch_a2 = new double[] { 1, 1.20922304075909, 2.27692490805580, 1.15664927482146, 0.914975834801436 };
-
 // Prepare the points for the first plot  
 GPointsArray points1 = new GPointsArray(bufferSize);
 GPointsArray points2 = new GPointsArray(bufferSize);
@@ -67,7 +64,7 @@ public void setup() {
   plotTime = new GPlot(this);
   plotTime.setPos(0, 0);
   plotTime.setDim(850, 280);
-  plotTime.setXLim(0, bufferSize-254);
+  plotTime.setXLim(100, bufferSize-128);
   plotTime.setYLim(-30000, 30000);
   plotTime.drawGridLines(GPlot.VERTICAL);
   plotTime.setPoints(points1);
@@ -79,7 +76,6 @@ public void setup() {
   plotFreq.setDim(850, 280);
   plotFreq.setYLim(-50, 256);
   plotFreq.setXLim(0, bufferSize/4);
-  //plotFreq.setHorizontalAxesNTicks(10);
   plotFreq.setHorizontalAxesTicks(ticks);
   plotFreq.setPoints(points2);
   plotFreq.setLineColor(color(100, 100, 255));
@@ -115,6 +111,7 @@ public void setup() {
   freqAxis.setHorizontalAxesNTicks(15);
   freqAxis.drawXAxis();
   
+  
   // start serial communication
   if (!mockupSerial) {
     //String serialPortName = Serial.list()[1];
@@ -134,6 +131,7 @@ public void draw() {
   plotTime.drawBackground();
   plotTime.drawBox();
   plotTime.drawXAxis();
+  plotTime.drawYAxis();
   plotTime.drawGridLines(GPlot.BOTH);
   plotTime.drawLines();
   plotTime.endDraw();
@@ -215,6 +213,7 @@ public void draw() {
     freqAxis.beginDraw();
     freqAxis.drawXAxis();
     freqAxis.endDraw();
+    
   
   
   
